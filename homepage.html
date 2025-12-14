@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HCMUT.MALL - Siêu Sale 1.12</title>
+  <link href="https://fonts.googleapis.com/css2?family=Afacad:wght@400;500;600;700&family=Alumni+Sans:wght@900&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Afacad',sans-serif;background:#fff;color:#333;}
+
+    /* Header trắng */
+    header{background:#fff;padding:12px 60px;display:flex;align-items:center;gap:30px;position:sticky;top:0;z-index:999;box-shadow:0 2px 10px rgba(0,0,0,0.08);}
+    .logo{font-family:'Alumni Sans',sans-serif;font-size:48px;font-weight:900;color:#CF0000;}
+    .search{flex:1;background:#f5f5f5;border-radius:40px;padding:12px 20px;display:flex;align-items:center;gap:12px;}
+    .search input{border:none;background:none;outline:none;width:100%;font-size:16px;}
+    .search svg{width:22px;height:22px;fill:#999;}
+    .header-right{display:flex;gap:20px;align-items:center;}
+    .header-right img{width:28px;height:28px;}
+
+    /* Topbar đen nhỏ */
+    .topbar{height:36px;background:#000;color:#fff;font-size:13px;display:flex;align-items:center;justify-content:space-between;padding:0 60px;}
+    .topbar a{color:#fff;text-decoration:none;}
+    .topbar .left,.topbar .right{display:flex;gap:24px;}
+
+    /* Container */
+    .container{max-width:1400px;margin:0 auto;padding:0 20px;}
+
+    /* Banner chính + phụ */
+    .hero{margin:20px 0;display:grid;grid-template-columns:2fr 1fr;gap:12px;}
+    .hero img{width:100%;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1);}
+
+    /* Danh mục tròn */
+    .categories{margin:30px 0;display:grid;grid-template-columns:repeat(10,1fr);gap:16px;}
+    .cat-item{text-align:center;}
+    .cat-icon{width:60px;height:60px;background:#f5f5f5;border-radius:50%;margin:0 auto 8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+    .cat-name{font-size:13px;color:#555;}
+
+    /* Flash Sale */
+    .flash-sale{margin:40px 0;}
+    .flash-header{color:#CF0000;font-size:28px;font-weight:700;display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+    .flash-header svg{width:32px;height:32px;fill:#CF0000;}
+    .countdown{color:#fff;background:#CF0000;padding:4px 12px;border-radius:6px;font-size:18px;font-weight:600;}
+    .flash-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;}
+    .flash-item{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.1);transition:all .2s;}
+    .flash-item:hover{transform:translateY(-6px);box-shadow:0 12px 24px rgba(0,0,0,0.18);}
+    .flash-img{height:170px;background:#fafafa;}
+    .flash-info{padding:12px;text-align:center;}
+    .flash-price{color:#CF0000;font-size:19px;font-weight:700;}
+    .flash-old{text-decoration:line-through;color:#999;font-size:13px;}
+    .flash-soldbar{height:5px;background:#eee;border-radius:3px;margin:8px 10px;overflow:hidden;}
+    .flash-soldfill{height:100%;background:#CF0000;width:78%;}
+    .flash-soldtext{color:#CF0000;font-size:12px;font-weight:600;}
+
+    /* Banner giữa */
+    .mid-banner{margin:40px 0;}
+    .mid-banner img{width:100%;border-radius:12px;}
+
+    /* Section chung */
+    .section-title{color:#000;font-size:28px;font-weight:700;margin:50px 0 20px;}
+    .product-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:20px;}
+    .product-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.1);transition:all .2s;cursor:pointer;}
+    .product-card:hover{transform:translateY(-6px);box-shadow:0 12px 24px rgba(0,0,0,0.18);}
+    .product-img{height:200px;background:#fafafa;}
+    .product-info{padding:12px;}
+    .product-name{font-size:14px;color:#666;height:40px;overflow:hidden;line-height:1.4;margin-bottom:8px;}
+    .product-price{color:#CF0000;font-size:19px;font-weight:700;}
+    .product-old{text-decoration:line-through;color:#999;margin-left:8px;font-size:13px;}
+    .product-discount{background:#ffebeb;color:#CF0000;padding:2px 6px;border-radius:4px;font-size:12px;}
+
+    /* Footer */
+    footer{background:#000;color:#ccc;padding:60px 60px 30px;}
+    .footer-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:40px;}
+    .footer-col h3{font-size:16px;font-weight:700;color:#fff;margin-bottom:20px;}
+    .footer-col a{display:block;color:#ccc;font-size:14px;margin:8px 0;text-decoration:none;}
+    .footer-col a:hover{color:#CF0000;}
+    .footer-bottom{margin-top:50px;padding-top:20px;border-top:1px solid #333;text-align:center;font-size:13px;color:#888;}
+
+    /* Back to top */
+    #backTop{position:fixed;bottom:30px;right:30px;width:50px;height:50px;background:#CF0000;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;opacity:0;visibility:hidden;transition:all .3s;box-shadow:0 4px 16px rgba(207,0,0,0.4);}
+    #backTop.show{opacity:1;visibility:visible;z-index:999;}
+
+    @media(max-width:1200px){
+      header,.topbar,.container,footer{padding-left:30px;padding-right:30px;}
+      .hero{grid-template-columns:1fr;}
+      .flash-grid,.product-grid{grid-template-columns:repeat(4,1fr);}
+      .categories{grid-template-columns:repeat(5,1fr);}
+    }
+    @media(max-width:768px){
+      .flash-grid,.product-grid{grid-template-columns:repeat(2,1fr);}
+      .categories{grid-template-columns:repeat(4,1fr);}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar đen -->
+  <div class="topbar">
+    <div class="left">
+      <a href="#">Trang người bán</a>
+      <a href="#">Trở thành Người bán</a>
+      <a href="#">Tải ứng dụng</a>
+      <a href="#">Khuyến mãi</a>
+      <a href="#">Live</a>
+    </div>
+    <div class="right">
+      <a href="#">Thông báo</a>
+      <a href="#">Hỗ trợ</a>
+      <a href="#">Đăng ký</a>
+      <a href="#">Đăng nhập</a>
+    </div>
+  </div>
+
+  <!-- Header trắng -->
+  <header>
+    <div class="logo">HCMUT.MALL</div>
+    <div class="search">
+      <svg viewBox="0 0 24 24"><path d="M21.7 20.3l-5.3-5.3c1.3-1.7 2-3.8 2-6 0-5-4-9-9-9s-9 4-9 9 4 9 9 9c2.2 0 4.3-0.8 6-2.1l5.3 5.3 1.7-1.7zM4.5 9.5c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6-6-2.7-6-6z"/></svg>
+      <input type="text" placeholder="Search for products...">
+    </div>
+    <div class="header-right">
+      <img src="https://img.icons8.com/ios-filled/50/000000/bell.png">
+      <img src="https://img.icons8.com/ios-filled/50/000000/shopping-cart.png">
+      <img src="https://img.icons8.com/ios-filled/50/000000/user.png">
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Banner chính + phụ -->
+    <div class="hero">
+      <img src="https://cf.shopee.vn/file/sg-11134235-7rdwz-lv5v0q5v0q5v0q_xxhdpi" alt="Siêu Sale 1.12">
+      <div>
+        <img src="https://cf.shopee.vn/file/sg-11134235-7rdwz-lv5v0q5v0q5v0q_xxhdpi" alt="Freeship 0đ">
+        <img src="https://cf.shopee.vn/file/sg-11134235-7rdwz-lv5v0q5v0q5v0q_xxhdpi" alt="1 Chạm 1 Triệu" style="margin-top:12px;">
+      </div>
+    </div>
+
+    <!-- Danh mục tròn -->
+    <div class="categories">
+      <div class="cat-item"><div class="cat-icon"></div><div class="cat-name">Điện thoại</div></div>
+      <div class="cat-item"><div class="cat-icon"></div><div class="cat-name">Laptop</div></div>
+      <div class="cat-item"><div class="cat-icon"></div><div class="cat-name">Áo thun</div></div>
+      <div class="cat-item"><div class="cat-icon"></div><div class="cat-name">Giày dép</div></div>
+      <div class="cat-item"><div class="cat-icon"></div><div class="cat-name">Túi xách</div></div>
+      <div class="cat-item"><div class="cat-icon"></div><div class="cat-name">Đồng hồ</div></div>
+      <div class="cat-item"><div class="cat-icon"></div><div class="cat-name">Mỹ phẩm</div></div>
+      <div class="cat-item"><div class="cat-icon"></div><div class="cat-name">Nhà cửa</div></div>
+      <div class="cat-item"><div class="cat-icon"></div><div class="cat-name">Thực phẩm</div></div>
+      <div class="cat-item"><div class="cat-icon"></div><div class="cat-name">Sách</div></div>
+    </div>
+
+    <!-- Flash Sale -->
+    <div class="flash-sale">
+      <div class="flash-header">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 12H12L10 22L22 12H12L14 2Z"/></svg>
+        Flash Sale
+        <div class="countdown">08 : 45 : 21</div>
+      </div>
+      <div class="flash-grid">
+        <div class="flash-item">
+          <div class="flash-img"></div>
+          <div class="flash-info">
+            <div class="flash-price">99.000đ</div>
+            <div class="flash-old">999.000đ</div>
+            <div class="flash-soldbar"><div class="flash-soldfill" style="width:88%"></div></div>
+            <div class="flash-soldtext">Đã bán 12.5k</div>
+          </div>
+        </div>
+        <!-- Lặp lại 5 cái -->
+        <div class="flash-item"><div class="flash-img"></div><div class="flash-info"><div class="flash-price">149.000đ</div><div class="flash-old">599.000đ</div><div class="flash-soldbar"><div class="flash-soldfill" style="width:92%"></div></div><div class="flash-soldtext">Đã bán 18k</div></div></div>
+        <div class="flash-item"><div class="flash-img"></div><div class="flash-info"><div class="flash-price">79.000đ</div><div class="flash-old">399.000đ</div><div class="flash-soldbar"><div class="flash-soldfill" style="width:70%"></div></div><div class="flash-soldtext">Đã bán 9.2k</div></div></div>
+        <div class="flash-item"><div class="flash-img"></div><div class="flash-info"><div class="flash-price">199.000đ</div><div class="flash-old">899.000đ</div><div class="flash-soldbar"><div class="flash-soldfill" style="width:65%"></div></div><div class="flash-soldtext">Đã bán 15k</div></div></div>
+        <div class="flash-item"><div class="flash-img"></div><div class="flash-info"><div class="flash-price">59.000đ</div><div class="flash-old">299.000đ</div><div class="flash-soldbar"><div class="flash-soldfill" style="width:98%"></div></div><div class="flash-soldtext">Gần hết!</div></div></div>
+        <div class="flash-item"><div class="flash-img"></div><div class="flash-info"><div class="flash-price">299.000đ</div><div class="flash-old">1.299.000đ</div><div class="flash-soldbar"><div class="flash-soldfill" style="width:55%"></div></div><div class="flash-soldtext">Đã bán 7.1k</div></div></div>
+      </div>
+    </div>
+
+    <!-- Banner giữa -->
+    <div class="mid-banner">
+      <img src="https://cf.shopee.vn/file/sg-11134235-7rdwz-lv5v0q5v0q5v0q_xxhdpi" alt="Ưu đãi độc quyền">
+    </div>
+
+    <!-- Tìm kiếm hàng đầu -->
+    <h2 class="section-title">Tìm kiếm hàng đầu</h2>
+    <div class="product-grid">
+      <!-- 6-12 sản phẩm -->
+      <div class="product-card"><div class="product-img"></div><div class="product-info"><div class="product-name">Áo thun nam cotton basic</div><div class="product-price">89.000đ</div></div></div>
+      <div class="product-card"><div class="product-img"></div><div class="product-info"><div class="product-name">Giày sneaker nam nữ</div><div class="product-price">299.000đ</div></div></div>
+      <!-- Thêm tiếp... -->
+    </div>
+
+    <!-- Gợi ý hôm nay -->
+    <h2 class="section-title">Gợi ý hôm nay</h2>
+    <div class="product-grid">
+      <!-- 36 sản phẩm -->
+      <div class="product-card">
+        <div class="product-img"></div>
+        <div class="product-info">
+          <div class="product-name">Áo hoodie unisex form rộng có nón</div>
+          <div><span class="product-price">179.000đ</span> <span class="product-old">399.000đ</span> <span class="product-discount">-55%</span></div>
+        </div>
+      </div>
+      <!-- Thêm nhiều hơn... -->
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid container">
+      <div class="footer-col"><h3>CHĂM SÓC KHÁCH HÀNG</h3><a href="#">Trung tâm trợ giúp</a><a href="#">Hướng dẫn mua hàng</a></div>
+      <div class="footer-col"><h3>VỀ HCMUT.MALL</h3><a href="#">Giới thiệu</a><a href="#">Tuyển dụng</a></div>
+      <div class="footer-col"><h3>THEO DÕI CHÚNG TÔI</h3><a href="#">Facebook</a><a href="#">Instagram</a></div>
+      <div class="footer-col"><h3>THANH TOÁN</h3><p>Visa, Momo, ZaloPay, COD</p></div>
+      <div class="footer-col"><h3>VẬN CHUYỂN</h3><p>GHN, GHTK, Viettel Post</p></div>
+    </div>
+    <div class="footer-bottom">© 2025 HCMUT.MALL - Đồ án nhóm sinh viên Bách Khoa</div>
+  </footer>
+
+  <!-- Back to top -->
+  <div id="backTop">Up</div>
+
+  <script>
+    // Countdown Flash Sale
+    let time = 8*3600 + 45*60 + 21;
+    setInterval(() => {
+      if (time > 0) {
+        time--;
+        let h = String(Math.floor(time / 3600)).padStart(2,'0');
+        let m = String(Math.floor((time % 3600)/60)).padStart(2,'0');
+        let s = String(time % 60).padStart(2,'0');
+        document.querySelector('.countdown').textContent = `${h} : ${m} : ${s}`;
+      }
+    }, 1000);
+
+    // Back to top
+    const btn = document.getElementById('backTop');
+    window.addEventListener('scroll', () => btn.classList.toggle('show', window.scrollY > 600));
+    btn.onclick = () => window.scrollTo({top:0, behavior:'smooth'});
+  </script>
+</body>
+</html>

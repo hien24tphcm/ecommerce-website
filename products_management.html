@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Sản Phẩm</title>
+    <link href="https://fonts.googleapis.com/css2?family=Afacad:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Afacad',sans-serif;background:linear-gradient(135deg,#f5f7fa,#c3cfe2);min-height:100vh;padding:20px;}
+        .container{max-width:1200px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.1);overflow:hidden;}
+        
+        .header{background:#CF0000;color:#fff;padding:20px 30px;display:flex;justify-content:space-between;align-items:center;}
+        .header h1{font-size:24px;font-weight:700;}
+        .home-link{color:#fff;text-decoration:none;font-weight:600;background:rgba(255,255,255,0.2);padding:8px 16px;border-radius:6px;font-size:14px;transition:0.3s;}
+        .home-link:hover{background:rgba(255,255,255,0.4);}
+
+        .content{padding:30px;}
+        .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;gap:20px;flex-wrap:wrap;}
+        .search-box{flex:1;min-width:250px;}
+        .search-box input{width:100%;padding:12px 15px;border:2px solid #eee;border-radius:8px;font-size:14px;}
+        .search-box input:focus{outline:none;border-color:#CF0000;}
+        
+        .btn{padding:12px 24px;border:none;border-radius:8px;font-weight:600;cursor:pointer;transition:all .3s;}
+        .btn-primary{background:#CF0000;color:#fff;}
+        .btn-primary:hover{background:#a00000;}
+        .btn-danger{background:#e74c3c;color:#fff;}
+        .btn-info{background:#3498db;color:#fff;}
+        .btn-sm{padding:6px 12px;font-size:13px;border-radius:6px;}
+        
+        table{width:100%;border-collapse:collapse;margin-top:10px;}
+        th{background:#f8f9fa;padding:15px;text-align:left;font-weight:600;color:#333;border-bottom:2px solid #ddd;}
+        td{padding:15px;border-bottom:1px solid #eee;vertical-align:middle;}
+        tr:hover{background:#fafafa;}
+        
+        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+        .modal.active{display:flex;}
+        .modal-content{background:#fff;border-radius:12px;padding:30px;width:90%;max-width:520px;max-height:90vh;overflow-y:auto;}
+        .modal-header{font-size:20px;font-weight:700;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+        .close-btn{background:none;border:none;font-size:28px;cursor:pointer;color:#999;}
+        
+        .form-group{margin-bottom:20px;}
+        .form-group label{display:block;margin-bottom:8px;font-weight:600;font-size:14px;}
+        .form-group input,.form-group textarea,.form-group select{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:14px;}
+        .modal-footer{display:flex;gap:12px;margin-top:30px;}
+        .modal-footer .btn{flex:1;}
+        
+        #imagePreview{margin-top:12px;text-align:center;display:none;}
+        #imagePreview img{max-width:100%;max-height:200px;border-radius:8px;object-fit:contain;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Kênh Người Bán</h1>
+            <a href="category-page_new.php" class="home-link">← Về Trang Chủ</a>
+        </div>
+
+        <div class="content">
+            <div class="toolbar">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm tên sản phẩm...">
+                </div>
+                <button class="btn btn-primary" onclick="openAddModal()">+ Thêm Sản Phẩm Mới</button>
+            </div>
+            <table id="productsTable">
+                <thead>
+                    <tr>
+                        <th width="50">ID</th>
+                        <th width="80">Ảnh</th>
+                        <th>Tên Sản Phẩm</th>
+                        <th>Danh Mục</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th width="150">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="modalTitle">Thêm Sản Phẩm</span>
+                <button class="close-btn" onclick="closeProductModal()">×</button>
+            </div>
+            <form id="productForm" onsubmit="saveProduct(event)">
+                <input type="hidden" id="productId">
+                <div class="form-group">
+                    <label>Tên Sản Phẩm *</label>
+                    <input type="text" id="tenSanPham" name="TenSanPham" required>
+                </div>
+                <div class="form-group">
+                    <label>Danh Mục *</label>
+                    <select id="maLoai" name="MaLoai" required>
+                        <option value="">Đang tải...</option>
+                    </select>
+                </div>
+                <div style="display:flex;gap:15px;">
+                    <div class="form-group" style="flex:1;">
+                        <label>Giá (VNĐ) *</label>
+                        <input type="number" id="gia" name="Gia" min="0" required>
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Số lượng *</label>
+                        <input type="number" id="soLuong" name="SoLuongTon" min="0" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Link Hình Ảnh</label>
+                    <input type="url" id="imageUrl" name="HinhAnh" placeholder="http://..." onchange="applyImageUrl()">
+                    <div id="imagePreview"><img id="previewImg" src=""></div>
+                </div>
+                <div class="form-group">
+                    <label>Mô Tả Chi Tiết</label>
+                    <textarea id="moTa" name="MoTa" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="closeProductModal()" style="background:#f1f1f1;color:#333;">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu Lại</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let allProducts = [];
+
+        // KHI TRANG TẢI XONG
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProducts();
+            loadCategories();
+            
+            // Tìm kiếm
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = allProducts.filter(p => p.TenSanPham.toLowerCase().includes(term));
+                renderTable(filtered);
+            });
+        });
+
+        // 1. TẢI DANH MỤC
+        function loadCategories() {
+            const select = document.getElementById('maLoai');
+            select.innerHTML = '<option value="">Đang tải...</option>';
+
+            fetch('products_management.php?action=get_categories')
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        select.innerHTML = '<option value="">-- Chọn danh mục --</option>';
+                        res.data.forEach(c => {
+                            select.innerHTML += `<option value="${c.MaLoai}">${c.TenLoai}</option>`;
+                        });
+                    } else {
+                        select.innerHTML = '<option value="">Lỗi tải danh mục</option>';
+                        console.error(res.message);
+                    }
+                })
+                .catch(err => {
+                    console.error("Lỗi:", err);
+                    select.innerHTML = '<option value="">Lỗi kết nối</option>';
+                });
+        }
+
+        // 2. TẢI SẢN PHẨM
+        function loadProducts() {
+            fetch('products_management.php?action=get_all')
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        allProducts = res.data;
+                        renderTable(allProducts);
+                    } else if (res.message.includes("đăng nhập")) {
+                        alert("Hết phiên đăng nhập. Vui lòng đăng nhập lại!");
+                        window.location.href = "category-page_new.php";
+                    } else {
+                        console.error(res.message);
+                    }
+                })
+                .catch(err => console.error("Lỗi:", err));
+        }
+
+        function renderTable(products) {
+            const tbody = document.getElementById('tableBody');
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;">Không có sản phẩm nào</td></tr>';
+                return;
+            }
+            tbody.innerHTML = products.map(p => `
+                <tr>
+                    <td>${p.ProductID}</td>
+                    <td><img src="${p.HinhAnh || 'https://via.placeholder.com/50'}" width="50" height="50" style="object-fit:cover;border-radius:4px"></td>
+                    <td>${p.TenSanPham}</td>
+                    <td>${p.TenLoai || 'Chưa phân loại'}</td>
+                    <td style="color:#c00;font-weight:bold;">${Number(p.Gia).toLocaleString()}đ</td>
+                    <td>${p.SoLuongTon}</td>
+                    <td>
+                        <button class="btn btn-info btn-sm" onclick="openEditModal(${p.ProductID})">Sửa</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.ProductID})">Xóa</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // MODAL LOGIC
+        function openAddModal() {
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('modalTitle').textContent = 'Thêm Sản Phẩm';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        function openEditModal(id) {
+            const p = allProducts.find(x => x.ProductID == id);
+            if (!p) return;
+            
+            document.getElementById('productId').value = p.ProductID;
+            document.getElementById('tenSanPham').value = p.TenSanPham;
+            document.getElementById('maLoai').value = p.MaLoai;
+            document.getElementById('gia').value = p.Gia;
+            document.getElementById('soLuong').value = p.SoLuongTon;
+            document.getElementById('imageUrl').value = p.HinhAnh || '';
+            document.getElementById('moTa').value = p.MoTa || '';
+            
+            applyImageUrl();
+            document.getElementById('modalTitle').textContent = 'Sửa Sản Phẩm';
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        function closeProductModal() { document.getElementById('productModal').classList.remove('active'); }
+        
+        function applyImageUrl() {
+            const url = document.getElementById('imageUrl').value;
+            if (url) {
+                document.getElementById('previewImg').src = url;
+                document.getElementById('imagePreview').style.display = 'block';
+            }
+        }
+
+        function saveProduct(e) {
+            e.preventDefault();
+            const form = document.getElementById('productForm');
+            const formData = new FormData(form);
+            const id = document.getElementById('productId').value;
+            if(id) formData.append('ProductID', id);
+
+            const action = id ? 'update' : 'add';
+
+            fetch(`products_management.php?action=${action}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(res => {
+                if(res.success) {
+                    alert(res.message);
+                    closeProductModal();
+                    loadProducts();
+                } else {
+                    alert("Lỗi: " + res.message);
+                }
+            });
+        }
+
+        function deleteProduct(id) {
+            if(!confirm("Bạn chắc chắn muốn xóa?")) return;
+            
+            fetch('products_management.php?action=delete', {
+                method: 'POST',
+                body: JSON.stringify({ProductID: id}),
+                headers: {'Content-Type': 'application/json'}
+            })
+            .then(r => r.json())
+            .then(res => {
+                if(res.success) {
+                    alert(res.message);
+                    loadProducts();
+                } else {
+                    alert("Lỗi: " + res.message);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<?php
+session_start();
+include 'db_connect.php'; // Kết nối DB nếu cần load sản phẩm
+?>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loại sản phẩm | HCMUT.MALL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Afacad:wght@400;500;600;700&family=Alumni+Sans:wght@900&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Afacad',sans-serif;background:#fff;color:#000;}
+    a{text-decoration:none;color:inherit;}
+
+    /* Header */
+    .top-bar{height:48px;background:#000;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:space-between;padding:0 100px;}
+    .top-bar .left,.top-bar .right{display:flex;gap:32px;}
+    header{padding:20px 100px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;}
+    .logo{font-family:'Alumni Sans';font-size:48px;font-weight:900;color:#CF0000;}
+    .search-bar{flex:1;max-width:600px;margin:0 40px;background:#F0F0F0;border-radius:60px;padding:12px 20px;display:flex;align-items:center;gap:12px;}
+    .search-bar input{border:none;background:none;outline:none;width:100%;font-size:16px;}
+    .icons{display:flex;gap:16px;}
+    nav{padding:16px 100px;display:flex;gap:32px;font-size:14px;}
+    .breadcrumb{padding:0 100px;margin:20px 0;font-size:16px;color:#666;}
+    .breadcrumb span{color:#000;}
+
+    main{padding:0 100px 120px;display:flex;gap:40px;position:relative;}
+    aside{width:300px;flex-shrink:0;position:sticky;top:20px;height:fit-content;}
+
+    .filter-header{font-size:20px;font-weight:700;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+    .clear-all{color:#CF0000;font-size:14px;cursor:pointer;}
+
+    .filter-section{background:#fff;border:1px solid #eee;border-radius:12px;padding:20px;margin-bottom:16px;}
+    .filter-title{font-weight:600;font-size:16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+    .filter-title svg{width:16px;height:16px;transition:transform .2s;}
+    .filter-title.open svg{transform:rotate(180deg);}
+    .filter-content{max-height:0;overflow:hidden;transition:max-height .35s ease;padding-top:10px;}
+    .filter-content.open{max-height:2000px;}
+
+    /* Filter màu, size, rating */
+    .colors{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0;}
+    .color{width:40px;height:40px;border-radius:50%;cursor:pointer;position:relative;border:3px solid transparent;}
+    .color.selected{border:3px solid #000;}
+    .color.selected::after{content:"Check";position:absolute;inset:0;margin:auto;color:#fff;font-weight:bold;}
+    .color.white{border:2px solid #ddd;}
+
+    /* .sizes{display:grid;grid-template-columns:repeat(4,1fr);gap:gap:10px;margin:16px 0;} */
+    .size{padding:8px 12px;border:1px solid #ddd;border-radius:8px;text-align:center;cursor:pointer;font-size:14px;}
+    .size.selected{background:#000;color:#fff;}
+
+    .rating-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;cursor:pointer;font-size:15px;}
+    .stars{color:#FF9529;}
+
+    .filter-actions{position:sticky;bottom:0;background:#fff;padding:20px 0;border-top:1px solid #eee;display:flex;gap:12px;margin-top:20px;}
+    .btn{flex:1;padding:14px;border-radius:12px;font-weight:600;cursor:pointer;text-align:center;}
+    .btn-clear{background:#fff;border:1px solid #ddd;color:#000;}
+    .btn-apply{background:#CF0000;color:#fff;border:none;}
+
+    /* Slider giá */
+    .range-slider{position:relative;height:50px;margin:30px 10px;}
+    .range-slider input[type=range]{-webkit-appearance:none;appearance:none;width:100%;background:transparent;position:absolute;pointer-events:none;}
+    .range-slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;height:20px;width:20px;border-radius:50%;background:#CF0000;cursor:pointer;pointer-events:auto;border:4px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.2);}
+    .range-track{position:absolute;top:50%;left:10px;right:10px;height:6px;background:#eee;border-radius:3px;transform:translateY(-50%);}
+    .range-fill{position:absolute;top:50%;height:6px;background:#CF0000;border-radius:3px;transform:translateY(-50%);left:5%;right:50%;}
+
+    .price-inputs{display:flex;align-items:center;justify-content:space-between;margin:20px 10px 10px;gap:12px;flex-wrap:wrap;}
+    .price-inputs > div{display:flex;align-items:center;gap:8px;flex:1;min-width:200px;}
+    .price-inputs input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;text-align:center;font-size:14px;}
+    .apply-price-btn{padding:10px 20px;background:#CF0000;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;}
+
+    /* Product grid */
+    .product-grid{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:24px;}
+    .product-card{
+      background:#fff;border-radius:16px;overflow:hidden;
+      box-shadow:0 4px 15px rgba(0,0,0,0.08);cursor:pointer;
+      transition:all .35s cubic-bezier(0.4,0,0.2,1);border:1px solid #eee;
+    }
+    .product-card:hover{
+      transform:translateY(-12px);box-shadow:0 20px 40px rgba(0,0,0,0.15) !important;
+      border-color:#CF0000;
+    }
+
+    .product-img{
+      height:260px;overflow:hidden;position:relative;background:#f8f8f8;
+    }
+    .product-img img{
+      width:100%;height:100%;object-fit:cover;transition:transform .5s ease;
+    }
+    .product-card:hover .product-img img{transform:scale(1.1);}
+
+    .product-info{padding:16px;}
+    .product-name{
+      font-size:15.5px;line-height:1.4;height:46px;overflow:hidden;
+      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+      margin-bottom:10px;color:#333;font-weight:500;
+    }
+    .product-price{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .price{font-size:20px;font-weight:700;color:#CF0000;}
+    .stock-low{
+      background:#ffeaea;color:#e74c3c;padding:4px 10px;border-radius:20px;
+      font-size:12px;font-weight:600;
+    }
+    .product-footer{
+      display:flex;justify-content:space-between;align-items:center;margin-top:12px;
+      font-size:13.5px;color:#666;
+    }
+    .rating{color:#f39c12;font-weight:600;}
+    .sold{color:#777;font-size:13px;}
+  </style>
+</head>
+<body>
+
+  <!-- Header (giữ nguyên) -->
+  <div class="top-bar"><div class="left"><span>Trang người bán</span><span>Trở thành Người bán</span><span>Tải ứng dụng</span></div><div class="right"><span>Hỗ trợ</span><span>Thông báo</span><span>Đăng ký</span><span>Đăng nhập</span></div></div>
+  <header><div class="logo">HCMUT.MALL</div><div class="search-bar"><svg width="24" height="24" viewBox="0 0 24 24" fill="#CF0000"><path d="M21.7 20.3l-5.3-5.3c1.3-1.7 2-3.8 2-6 0-5-4-9-9-9s-9 4-9 9 4 9 9 9c2.2 0 4.3-0.8 6-2.1l5.3 5.3 1.7-1.7zM4.5 9.5c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6-6-2.7-6-6z"/></svg><input type="text" placeholder="Tìm kiếm sản phẩm..."></div><div class="icons"><img src="https://img.icons8.com/ios/50/user.png" width="28"><img src="https://img.icons8.com/ios/50/shopping-cart.png" width="28"></div></header>
+  <nav><a href="#">Điện thoại</a><a href="#">Laptop</a><a href="#">Quần áo</a><a href="#">Túi</a></nav>
+  <div class="breadcrumb">Home > <span>Loại sản phẩm</span></div>
+
+  <main>
+    <aside>
+      <div class="filter-header">Bộ lọc tìm kiếm <span class="clear-all">Xóa tất cả</span></div>
+
+      <!-- Khoảng giá -->
+      <div class="filter-section">
+        <div class="filter-title open">Khoảng giá <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="filter-content open">
+          <div class="range-slider">
+            <input type="range" min="0" max="10000000" value="0" step="10000" class="range-min">
+            <input type="range" min="0" max="10000000" value="10000000" step="10000" class="range-max">
+            <div class="range-track"><div class="range-fill"></div></div>
+          </div>
+          <div class="price-inputs">
+            <div>
+              <input type="text" class="price-min-input" value="0đ">
+              <span>→</span>
+              <input type="text" class="price-max-input" value="10.000.000đ">
+            </div>
+            <button class="apply-price-btn">Áp dụng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Các filter khác giữ nguyên như cũ -->
+      <div class="filter-section">
+        <div class="filter-title open">Màu sắc <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="filter-content open">
+          <div class="colors">
+            <div class="color" style="background:#0066FF;"></div>
+            <div class="color" style="background:#FF0000;"></div>
+            <div class="color" style="background:#000000;"></div>
+            <div class="color white" style="background:#FFFFFF;"></div>
+            <div class="color" style="background:#FF8800;"></div>
+            <div class="color" style="background:#00FF00;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-title open">Size <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="filter-content open">
+          <div class="sizes">
+            <div class="size">XS</div><div class="size">S</div><div class="size">M</div><div class="size selected">L</div>
+            <div class="size">XL</div><div class="size">XXL</div><div class="size">3XL</div><div class="size">4XL</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-title open">Đánh giá <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="filter-content open">
+          <div class="rating-filter">
+            <div class="rating-item"><span class="stars">★★★★★</span><span>5 sao</span></div>
+            <div class="rating-item"><span class="stars">★★★★☆</span><span>4 sao trở lên</span></div>
+            <div class="rating-item"><span class="stars">★★★☆☆</span><span>3 sao trở lên</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <div class="btn btn-clear">Xóa tất cả bộ lọc</div>
+        <div class="btn btn-apply">Áp dụng bộ lọc</div>
+      </div>
+    </aside>
+    <section>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <h2 id="categoryTitle" style="font-size:28px;font-weight:700;">Tất cả sản phẩm</h2>
+        <div id="productCount" style="font-size:16px;color:#666;">Đang tải...</div>
+      </div>
+
+      <div class="product-grid" id="productGrid">
+        <!-- JS sẽ đổ sản phẩm vào đây -->
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let allProducts = [];
+
+    function loadProducts() {
+      fetch('products_management.php?action=get_all')
+        .then(r => r.json())
+        .then(res => {
+          if (res.success) {
+            allProducts = res.data;
+            renderProducts(allProducts);
+          }
+        })
+        .catch(() => console.log('Không tải được sản phẩm'));
+    }
+
+        function renderProducts(products) {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = '';
+
+      if (!products || products.length === 0) {
+        grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;padding:100px 20px;color:#999;font-size:18px;">
+          Chưa có sản phẩm nào trong danh mục này
+        </p>`;
+        document.getElementById('productCount').textContent = '0 sản phẩm';
+        return;
+      }
+
+      products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+
+        const imgUrl = p.HinhAnh && p.HinhAnh.trim() ? p.HinhAnh : 'https://via.placeholder.com/300x300/f5f5f5/cccccc?text=No+Image';
+        const price = Number(p.Gia).toLocaleString('vi-VN');
+        const stockInfo = p.SoLuongTon <= 5 ? `<span class="stock-low">Chỉ còn ${p.SoLuongTon} sp</span>` : '';
+
+        card.innerHTML = `
+          <div class="product-img">
+            <img src="${imgUrl}" alt="${p.TenSanPham}" onerror="this.src='https://via.placeholder.com/300x300/f0f0f0/999999?text=No+Image'">
+            <!-- NÚT + THÊM VÀO GIỎ HÀNG -->
+            <div class="add-to-cart" onclick="event.stopPropagation(); addToCart(${p.ProductID}, '${p.TenSanPham.replace(/'/g, "\\'")}', ${p.Gia}, '${imgUrl}')">
+              +
+            </div>
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">${p.TenSanPham}</h3>
+            <div class="product-price">
+              <span class="price">${price}đ</span>
+              ${stockInfo}
+            </div>
+            <div class="product-footer">
+              <span class="rating">★★★★★ <small style="color:#999;">(999+)</small></span>
+              <span class="sold">Đã bán 3.2k</span>
+            </div>
+          </div>
+        `;
+
+        // Click vào sản phẩm chỉ hiện chi tiết (không thêm vào giỏ)
+        card.onclick = () => {
+          alert(`[Chi tiết sản phẩm]\n${p.TenSanPham}\nGiá: ${price}đ\nCòn lại: ${p.SoLuongTon} sản phẩm`);
+        };
+
+        grid.appendChild(card);
+      });
+
+      document.getElementById('productCount').textContent = `Hiển thị ${products.length} sản phẩm`;
+    }
+
+    // Slider giá đẹp
+    const minSlider = document.querySelector('.range-min');
+    const maxSlider = document.querySelector('.range-max');
+    const fill = document.querySelector('.range-fill');
+    const minInput = document.querySelector('.price-min-input');
+    const maxInput = document.querySelector('.price-max-input');
+
+    function updateSlider() {
+      let min = parseInt(minSlider.value);
+      let max = parseInt(maxSlider.value);
+      if (min > max - 100000) min = max - 100000;
+      if (max < min + 100000) max = min + 100000;
+
+      minSlider.value = min;
+      maxSlider.value = max;
+
+      fill.style.left = (min / 20000000 * 100) + '%';
+      fill.style.right = (100 - max / 20000000 * 100) + '%';
+
+      minInput.value = min.toLocaleString('vi-VN') + 'đ';
+      maxInput.value = max.toLocaleString('vi-VN') + 'đ';
+    }
+
+    minSlider.addEventListener('input', updateSlider);
+    maxSlider.addEventListener('input', updateSlider);
+    document.querySelector('.apply-price-btn').addEventListener('click', () => {
+      const min = parseInt(minSlider.value);
+      const max = parseInt(maxSlider.value);
+      const filtered = allProducts.filter(p => p.Gia >= min && p.Gia <= max);
+      renderProducts(filtered);
+    });
+
+    // Tự động reload
+    setInterval(loadProducts, 7000);
+    loadProducts();
+  </script>
+</body>
+<!-- GIỎ HÀNG + THÔNG BÁO – CHỈ DÁN VÀO CUỐI <body> LÀ XONG -->
+<div class="cart-icon" onclick="openCart()">
+  <div class="cart-count" id="cartCount">0</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<style>
+  .cart-icon{
+    position:fixed;bottom:30px;right:30px;background:#CF0000;color:#fff;width:70px;height:70px;
+    border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-size:32px;box-shadow:0 10px 30px rgba(207,0,0,0.5);cursor:pointer;z-index:1000;
+  }
+  .cart-count{
+    position:absolute;top:-10px;right:-10px;background:#000;color:#fff;width:28px;height:28px;
+    border-radius:50%;font-size:14px;display:flex;align-items:center;justify-content:center;
+  }
+  .toast{
+    position:fixed;bottom:120px;left:50%;transform:translateX(-50%);background:#333;color:#fff;
+    padding:16px 40px;border-radius:50px;font-size:16px;z-index:1001;opacity:0;transition:all .4s;
+  }
+  .toast.show{opacity:1;bottom:140px;}
+  .add-to-cart{
+    position:absolute;top:12px;right:12px;background:#CF0000;color:#fff;width:44px;height:44px;
+    border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;
+    opacity:0;transition:all .3s;cursor:pointer;z-index:10;box-shadow:0 4px 12px rgba(207,0,0,0.4);
+  }
+  .product-card:hover .add-to-cart{opacity:1;}
+</style>
+
+<script>
+  let cart = JSON.parse(localStorage.getItem('hcmut_cart') || '[]');
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  function updateCartCount() {
+    const total = cart.reduce((s,i) => s + i.qty, 0);
+    document.getElementById('cartCount').textContent = total || '0';
+    localStorage.setItem('hcmut_cart', JSON.stringify(cart));
+  }
+
+  function addToCart(id, name, price, img) {
+    const item = cart.find(i => i.id === id);
+    if (item) item.qty++;
+    else cart.push({id, name, price, img, qty: 1});
+    updateCartCount();
+    showToast(`Đã thêm "${name}" vào giỏ hàng!`);
+  }
+
+  function openCart() {
+    if (cart.length === 0) return showToast('Giỏ hàng trống!');
+
+    let items = cart.map(i => `${i.name} × ${i.qty} = ${(i.price*i.qty).toLocaleString()}₫`).join('\n');
+    const total = cart.reduce((s,i) => s + i.price*i.qty, 0);
+
+    if (confirm(`GIỎ HÀNG CỦA BẠN:\n\n${items}\n\nTỔNG TIỀN: ${total.toLocaleString()}₫\n\nXác nhận tạo đơn hàng?`)) {
+  // GỬI ĐƠN HÀNG THẬT VÀO DATABASE
+  fetch('products_management.php?action=create_order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      buyer_id: 2,  // bạn có thể lấy từ đăng nhập sau
+      items: cart
+    })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.success) {
+      alert('ĐƠN HÀNG ĐÃ ĐƯỢC TẠO THÀNH CÔNG!\nMã đơn: ' + res.order_id + '\nCảm ơn bạn đã mua sắm tại HCMUT.MALL ❤️');
+      cart = [];
+      updateCartCount();
+      showToast('Tạo đơn thành công!');
+    } else {
+      alert('Lỗi: ' + res.message);
+    }
+  })
+  .catch(() => alert('Lỗi kết nối!'));
+}
+  }
+
+  // Gọi khi trang load
+  updateCartCount();
+</script>
+</html>
